@@ -13,6 +13,7 @@ RUN \
         docker \
         docker-cli-buildx \
         coreutils \
+        yq \
     && chmod +x /usr/bin/yq 
 
 COPY builder.sh /usr/bin/
