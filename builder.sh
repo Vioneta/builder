@@ -54,7 +54,7 @@ declare -A BUILD_MACHINE=(
 function print_help() {
     cat << EOF
 Hass.io build-env for ecosystem:
-docker run --rm vioneta/{arch}-builder:latest [options]
+docker run --rm homeassistant/{arch}-builder:latest [options]
 
 Options:
   -h, --help
@@ -129,6 +129,9 @@ Options:
     --machine <VERSION=ALL,X,Y>
         Build the machine based image for a release/landingpage.
 
+  Security:
+    --cosign
+        Enable signing images with cosign.
 EOF
 
     bashio::exit.nok
