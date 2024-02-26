@@ -46,7 +46,7 @@ declare -A BUILD_MACHINE=(
                           [raspberrypi3-64]="aarch64" \
                           [raspberrypi4]="armv7" \
                           [raspberrypi4-64]="aarch64" \
-                          [raspberrypi5-64]="aarch64" 
+                          [raspberrypi5-64]="aarch64" )
 
 
 #### Misc functions ####
