@@ -24,12 +24,12 @@ runs:
 
   - shell: bash
     run: |
-      docker pull ghcr.io/home-assistant/amd64-builder:${{ steps.version.outputs.version }}
+      docker pull ghcr.io/vioneta/amd64-builder:${{ steps.version.outputs.version }}
 
   - shell: bash
     id: builder
     run: |
-      builder=$(docker images ghcr.io/home-assistant/amd64-builder:${{ steps.version.outputs.version }} -q)
+      builder=$(docker images ghcr.io/vioneta/amd64-builder:${{ steps.version.outputs.version }} -q)
       echo "id=$builder" >> "$GITHUB_OUTPUT"
 
   - shell: bash
@@ -43,7 +43,7 @@ runs:
           -v ~/.docker:/root/.docker \
           -v ${{ github.workspace }}:/data \
           --env-file "${{ github.action_path }}/env_file" \
-          ghcr.io/home-assistant/amd64-builder:${{ steps.version.outputs.version }} \
+          ghcr.io/vioneta/amd64-builder:${{ steps.version.outputs.version }} \
           ${{ inputs.args }}
 
   - shell: bash

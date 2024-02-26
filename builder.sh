@@ -55,7 +55,7 @@ declare -A BUILD_MACHINE=(
 function print_help() {
     cat << EOF
 Hass.io build-env for ecosystem:
-docker run --rm homeassistant/{arch}-builder:latest [options]
+docker run --rm vioneta/{arch}-builder:latest [options]
 
 Options:
   -h, --help
