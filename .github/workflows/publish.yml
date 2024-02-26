@@ -28,10 +28,10 @@ jobs:
     name: Publish builder
     needs: init
     runs-on: ubuntu-latest
-    # permissions:
-    #   contents: read
-    #   id-token: write
-    #   packages: write
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
     strategy:
       fail-fast: False
       matrix:
