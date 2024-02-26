@@ -15,7 +15,7 @@ jobs:
 
       - name: Get information
         id: info
-        uses: home-assistant/actions/helpers/info@master
+        uses: Vioneta/actions/helpers/info@master
 
   build:
     name: Test action build
@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build the builder
-        uses: home-assistant/builder@master
+        uses: Vioneta/builder@master
         with:
           args: |
             --test \

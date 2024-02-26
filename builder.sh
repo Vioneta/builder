@@ -36,13 +36,6 @@ BUILD_TASKS=()
 BUILD_ERROR=()
 declare -A BUILD_MACHINE=(
                           [generic-x86-64]="amd64" \
-                          [intel-nuc]="amd64" \
-                          [khadas-vim3]="aarch64" \
-                          [odroid-c2]="aarch64" \
-                          [odroid-c4]="aarch64" \
-                          [odroid-m1]="aarch64" \
-                          [odroid-n2]="aarch64" \
-                          [odroid-xu]="armv7" \
                           [qemuarm]="armhf" \
                           [qemuarm-64]="aarch64" \
                           [qemux86]="i386" \
@@ -53,10 +46,7 @@ declare -A BUILD_MACHINE=(
                           [raspberrypi3-64]="aarch64" \
                           [raspberrypi4]="armv7" \
                           [raspberrypi4-64]="aarch64" \
-                          [raspberrypi5-64]="aarch64" \
-                          [yellow]="aarch64" \
-                          [green]="aarch64" \
-                          [tinker]="armv7" )
+                          [raspberrypi5-64]="aarch64" 
 
 
 #### Misc functions ####
@@ -64,7 +54,7 @@ declare -A BUILD_MACHINE=(
 function print_help() {
     cat << EOF
 Hass.io build-env for ecosystem:
-docker run --rm homeassistant/{arch}-builder:latest [options]
+docker run --rm vioneta/{arch}-builder:latest [options]
 
 Options:
   -h, --help
@@ -139,9 +129,6 @@ Options:
     --machine <VERSION=ALL,X,Y>
         Build the machine based image for a release/landingpage.
 
-  Security:
-    --cosign
-        Enable signing images with cosign.
 EOF
 
     bashio::exit.nok
@@ -223,10 +210,10 @@ function run_build() {
     local metadata
     local release="${version}"
     local dockerfile="${build_dir}/Dockerfile"
-    local cosign_base_identity=
-    local cosign_base_issuer=
-    local cosign_identity=
-    local cosign_issuer=
+    # local cosign_base_identity=
+    # local cosign_base_issuer=
+    # local cosign_identity=
+    # local cosign_issuer=
     local docker_wrapper=""
 
     # Overwrites
@@ -249,12 +236,12 @@ function run_build() {
     esac
 
     # Read build.json / cosign
-    if bashio::fs.file_exists "/tmp/build_config/build.json"; then
-        cosign_base_identity="$(jq --raw-output '.cosign.base_identity // empty' "/tmp/build_config/build.json")"
-        cosign_base_issuer="$(jq --raw-output '.cosign.base_issuer // "https://token.actions.githubusercontent.com"' "/tmp/build_config/build.json")"
-        cosign_identity="$(jq --raw-output '.cosign.identity // empty' "/tmp/build_config/build.json")"
-        cosign_issuer="$(jq --raw-output '.cosign.issuer // "https://token.actions.githubusercontent.com"' "/tmp/build_config/build.json")"
-    fi
+    # if bashio::fs.file_exists "/tmp/build_config/build.json"; then
+    #     cosign_base_identity="$(jq --raw-output '.cosign.base_identity // empty' "/tmp/build_config/build.json")"
+    #     cosign_base_issuer="$(jq --raw-output '.cosign.base_issuer // "https://token.actions.githubusercontent.com"' "/tmp/build_config/build.json")"
+    #     cosign_identity="$(jq --raw-output '.cosign.identity // empty' "/tmp/build_config/build.json")"
+    #     cosign_issuer="$(jq --raw-output '.cosign.issuer // "https://token.actions.githubusercontent.com"' "/tmp/build_config/build.json")"
+    # fi
 
     # Adjust Qemu CPU
     if bashio::var.equals "${build_arch}" armhf; then
@@ -292,7 +279,6 @@ function run_build() {
 
         if \
             docker image inspect "${repository}/${image}:${cache_tag}" > /dev/null 2>&1 \
-            && cosign_verify "${cosign_issuer}" "${cosign_identity}" "${repository}/${image}:${cache_tag}" "${docker_platform}" "false" \
         ; then
             docker_cli+=("--cache-from" "${repository}/${image}:${cache_tag}")
         else
@@ -310,9 +296,9 @@ function run_build() {
     docker_cli+=("--label" "org.opencontainers.image.version=${release}")
 
     # Validate the base image
-    if ! cosign_verify "${cosign_base_issuer}" "${cosign_base_identity}" "${build_from}" "${docker_platform}" "true"; then
-        bashio::exit.nok "Invalid base image ${build_from}"
-    fi
+    # if ! cosign_verify "${cosign_base_issuer}" "${cosign_base_identity}" "${build_from}" "${docker_platform}" "true"; then
+    #     bashio::exit.nok "Invalid base image ${build_from}"
+    # fi
 
     # Arch specific Dockerfile
     if bashio::fs.file_exists "${build_dir}/Dockerfile.${build_arch}"; then
@@ -389,7 +375,7 @@ function run_build() {
     fi
 
     # Singing image (cosign)
-    cosign_sign "${repository}/${image}:${version}"
+    # cosign_sign "${repository}/${image}:${version}"
 }
 
 function convert_to_json() {
@@ -732,73 +718,73 @@ function init_crosscompile() {
 
 #### Security cosign ####
 
-function cosign_sign() {
-    local image=$1
+# function cosign_sign() {
+#     local image=$1
 
-    local success=false
+#     local success=false
 
-    if bashio::var.false "${DOCKER_PUSH}" || bashio::var.false "${COSIGN}"; then
-        return 0
-    fi
+#     if bashio::var.false "${DOCKER_PUSH}" || bashio::var.false "${COSIGN}"; then
+#         return 0
+#     fi
     
-    for j in {1..6}; do
-        if cosign sign --yes "${image}"; then
-            success=true
-            break
-        fi
-        sleep $((5 * j))
-    done
+#     for j in {1..6}; do
+#         if cosign sign --yes "${image}"; then
+#             success=true
+#             break
+#         fi
+#         sleep $((5 * j))
+#     done
 
-    if bashio::var.false "${success}"; then
-        bashio::exit.nok "Failed to sign the image with cosign"
-    fi
-    bashio::log.info "Signed ${image} with cosign"
-}
+#     if bashio::var.false "${success}"; then
+#         bashio::exit.nok "Failed to sign the image with cosign"
+#     fi
+#     bashio::log.info "Signed ${image} with cosign"
+# }
 
-function cosign_verify() {
-    local issuer=$1
-    local identity=$2
-    local image=$3
-    local platform=$4
-    local pull=$5
+# function cosign_verify() {
+#     local issuer=$1
+#     local identity=$2
+#     local image=$3
+#     local platform=$4
+#     local pull=$5
 
-    local success=false
+#     local success=false
 
-    # Support scratch image
-    if [ "$image" == "scratch" ]; then
-        bashio::log.info "Scratch image, skiping validation with cosign"
-        return 0
-    fi
+#     # Support scratch image
+#     if [ "$image" == "scratch" ]; then
+#         bashio::log.info "Scratch image, skiping validation with cosign"
+#         return 0
+#     fi
 
-    # Nothing to validate against
-    if ! bashio::var.has_value "${issuer}" || ! bashio::var.has_value "${identity}" ; then
-        return 0
-    fi
+#     # Nothing to validate against
+#     if ! bashio::var.has_value "${issuer}" || ! bashio::var.has_value "${identity}" ; then
+#         return 0
+#     fi
 
-    # Pull image if needed
-    if bashio::var.true "${pull}"; then
-        bashio::log.info "Download image ${image} for cosign validation"
-        docker pull "${image}" --platform "${platform}" > /dev/null 2>&1 || bashio::exit.nok "Can't pull image ${image}"
-    fi
+#     # Pull image if needed
+#     if bashio::var.true "${pull}"; then
+#         bashio::log.info "Download image ${image} for cosign validation"
+#         docker pull "${image}" --platform "${platform}" > /dev/null 2>&1 || bashio::exit.nok "Can't pull image ${image}"
+#     fi
 
-    # validate image
-    for j in {1..6}; do
-        if cosign verify --certificate-oidc-issuer-regexp "${issuer}" --certificate-identity-regexp "${identity}" "${image}"; then
-            success=true
-            break
-        fi
-        sleep $((5 * j))
-    done
+#     # validate image
+#     for j in {1..6}; do
+#         if cosign verify --certificate-oidc-issuer-regexp "${issuer}" --certificate-identity-regexp "${identity}" "${image}"; then
+#             success=true
+#             break
+#         fi
+#         sleep $((5 * j))
+#     done
 
-    if bashio::var.false "${success}"; then
-        bashio::log.warning "Validation of ${image} fails with cosign!"
-        if bashio::var.true "${pull}"; then
-            docker rmi "${image}" > /dev/null 2>&1 || true
-        fi
-        return 1
-    fi
-    bashio::log.info "Image ${image} is trusted by cosign"
-}
+#     if bashio::var.false "${success}"; then
+#         bashio::log.warning "Validation of ${image} fails with cosign!"
+#         if bashio::var.true "${pull}"; then
+#             docker rmi "${image}" > /dev/null 2>&1 || true
+#         fi
+#         return 1
+#     fi
+#     bashio::log.info "Image ${image} is trusted by cosign"
+# }
 
 
 #### Error handling ####
@@ -857,9 +843,9 @@ while [[ $# -gt 0 ]]; do
         --self-cache)
             SELF_CACHE=true
             ;;
-        --cosign)
-            COSIGN=true
-            ;;
+        # --cosign)
+        #     COSIGN=true
+        #     ;;
         --cache-tag)
             CUSTOM_CACHE_TAG=$2
             shift
