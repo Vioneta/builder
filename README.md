@@ -1,4 +1,6 @@
-# Home Assistant builder
+[![Publish](https://github.com/Vioneta/builder/actions/workflows/publish.yml/badge.svg)](https://github.com/Vioneta/builder/actions/workflows/publish.yml)
+
+# builder
 
 _Multi-purpose cross-compile docker builder._
 
@@ -243,6 +245,7 @@ function builder() {
 ```
 
 This allows to build add-ons e.g. for a single architecture as follow:
+
 ```
 $ cd /path/to/your/add-on
 $ builder --amd64 --docker-hub agners
