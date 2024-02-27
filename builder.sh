@@ -847,9 +847,6 @@ while [[ $# -gt 0 ]]; do
         --self-cache)
             SELF_CACHE=true
             ;;
-        # --cosign)
-        #     COSIGN=true
-        #     ;;
         --cache-tag)
             CUSTOM_CACHE_TAG=$2
             shift
